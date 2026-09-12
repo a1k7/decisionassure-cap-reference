@@ -52,5 +52,10 @@ python examples/03_attestation_binding.py
 python examples/04_replay.py
 python -m compileall cap attestation examples
 ```
+## Generating a Signed Proof Trace
+
+To emit a self-contained, signed CAP proof trace with an embedded public key:
+
+python emit_signed_trace.py
 
 See [docs/](docs/) for the model, threat and trust-boundary analysis, replay, and validation scope.
