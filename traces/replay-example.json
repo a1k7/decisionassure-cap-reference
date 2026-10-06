@@ -1,1 +1,48 @@
-{"trace_version":"0.1","trace_id":"replay-001","event_type":"execution","action":{"action_type":"transfer","resource":"account-001","parameters":{"amount":100}},"attestation":{"fixture_status":"DETERMINISTIC_DEMONSTRATION_ARTIFACT","sequence_number":1042,"authority_reference":"authority-001"},"governance_state":{"policy_version":"1.0","authority_reference":"authority-001"},"evidence":[{"evidence_id":"ev-005","freshness_status":"VALID","reference":"external://demo/ev-005"}],"declared_conditions":{"attestation_available":true,"signature_valid":true,"binding_valid":true,"authority_valid":true,"sequence_status":"VALID","continuity_status":"VALID"},"decision":"ALLOW","rule_id":"CAP-REF-009","rule_version":"0.1","failure_reasons":[],"provenance":{"fixture":true,"signature_note":"No signature: static deterministic fixture."},"trace_hash":"002aaec601a1b9594b3d9904ccab95edcf509aa2228d08ee88fe5d43ec9e705d"}
+{
+  "version": "cap-envelope-v1",
+  "decision": "ALLOW",
+  "action": {
+    "action_type": "transfer",
+    "resource": "account-001",
+    "parameters": {
+      "amount": 100
+    }
+  },
+  "attestation": {
+    "action_type": "transfer",
+    "resource": "account-001",
+    "parameters_hash": "1477bd49d2f9523c05a4ae4f47e6f901c1a4613aca9d9d492b1a6263d14cca0b",
+    "sequence_number": 1042,
+    "authority_reference": "auth-001",
+    "timestamp": 1000
+  },
+  "evidence_status": [
+    "FRESH"
+  ],
+  "policy_version": "v1",
+  "policy_bundle_digest": "c19eb5ef722bd354f4ca635000778c30b994bbf7e6e99c0560d3bc3ad142ab49",
+  "authority_state": "VALID",
+  "continuity_valid": true,
+  "continuity_scope": {
+    "authority_reference": "auth-001",
+    "sequence_namespace": "attestation/auth-001",
+    "start_sequence": 1000,
+    "expected_next": 1043,
+    "heartbeat_interval_seconds": 60,
+    "policy_bundle_digest": "c19eb5ef722bd354f4ca635000778c30b994bbf7e6e99c0560d3bc3ad142ab49"
+  },
+  "key_resolution": {
+    "key_id": "key-demo-001",
+    "algorithm": "Ed25519",
+    "rotation_policy": "annual",
+    "issued_at": 900,
+    "expires_at": 4102444800
+  },
+  "observer_id": "decisionassure-reference",
+  "reference_frame": "cap-envelope-v1",
+  "runtime_context": {
+    "current_time": 1500
+  },
+  "key_id": "key-demo-001",
+  "signature": "96afc2a95380664f72197bf0478d445aabf86b1a305a9929701e789dbe6b24e49b359723f83d19b7f4acffd25501e5036a60d938a950aa10208d7eb150260808"
+}

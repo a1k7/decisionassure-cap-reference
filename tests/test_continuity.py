@@ -1,9 +1,17 @@
-from cap.continuity import verify_continuity
-from cap.models import GovernanceState, RuntimeContext, VerificationStatus
+import pytest
+from cap.continuity import check_continuity
 
-def state(policy="1"):
-    return GovernanceState("observer", "frame", policy, "authority", "delegation", True, VerificationStatus.VALID)
+def test_continuity_ok():
+    ok, gap = check_continuity(1043, 1042)
+    assert ok is True
+    assert gap is False
 
-def test_valid_and_changed_continuity():
-    original = state(); assert verify_continuity(RuntimeContext(original, baseline_continuity_hash=original.continuity_hash())).status is VerificationStatus.VALID
-    assert verify_continuity(RuntimeContext(state("2"), baseline_continuity_hash=original.continuity_hash())).reasons == ("CONTINUITY_HASH_MISMATCH",)
+def test_continuity_gap():
+    ok, gap = check_continuity(1045, 1042)
+    assert ok is False
+    assert gap is True
+
+def test_no_previous():
+    ok, gap = check_continuity(100, None)
+    assert ok is True
+    assert gap is False

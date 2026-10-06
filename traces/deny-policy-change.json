@@ -1,1 +1,49 @@
-{"trace_version":"0.1","trace_id":"policy-change-001","event_type":"execution","action":{"action_type":"transfer","resource":"account-001","parameters":{"amount":100}},"attestation":{"fixture_status":"DETERMINISTIC_DEMONSTRATION_ARTIFACT","sequence_number":1042},"governance_state":{"policy_version":"2.0","authorized_policy_version":"1.0"},"evidence":[{"evidence_id":"ev-002","freshness_status":"VALID","reference":"external://demo/ev-002"}],"declared_conditions":{"attestation_available":true,"signature_valid":true,"binding_valid":true,"authority_valid":true,"sequence_status":"VALID","continuity_status":"CHANGED"},"decision":"REAUTHORIZE","rule_id":"CAP-REF-008","rule_version":"0.1","failure_reasons":["CONTINUITY_HASH_MISMATCH"],"provenance":{"fixture":true},"trace_hash":"1000d83f733d8555f4fe0ae9904d5014f513270ad4c3d8541b8d4a674c77be0e"}
+{
+  "version": "cap-envelope-v1",
+  "decision": "DENY",
+  "action": {
+    "action_type": "transfer",
+    "resource": "account-001",
+    "parameters": {
+      "amount": 100
+    }
+  },
+  "attestation": {
+    "action_type": "transfer",
+    "resource": "account-001",
+    "parameters_hash": "1477bd49d2f9523c05a4ae4f47e6f901c1a4613aca9d9d492b1a6263d14cca0b",
+    "sequence_number": 1042,
+    "authority_reference": "auth-001",
+    "timestamp": 1000
+  },
+  "evidence_status": [
+    "POLICY_MISMATCH"
+  ],
+  "policy_version": "v2",
+  "policy_bundle_digest": "c19eb5ef722bd354f4ca635000778c30b994bbf7e6e99c0560d3bc3ad142ab49",
+  "authority_state": "VALID",
+  "continuity_valid": true,
+  "continuity_scope": {
+    "authority_reference": "auth-001",
+    "sequence_namespace": "attestation/auth-001",
+    "start_sequence": 1000,
+    "expected_next": 1043,
+    "heartbeat_interval_seconds": 60,
+    "policy_bundle_digest": "c19eb5ef722bd354f4ca635000778c30b994bbf7e6e99c0560d3bc3ad142ab49"
+  },
+  "key_resolution": {
+    "key_id": "key-demo-001",
+    "algorithm": "Ed25519",
+    "rotation_policy": "annual",
+    "issued_at": 900,
+    "expires_at": 4102444800
+  },
+  "observer_id": "decisionassure-reference",
+  "reference_frame": "cap-envelope-v1",
+  "runtime_context": {
+    "current_time": 1500,
+    "policy_version": "v2"
+  },
+  "key_id": "key-demo-001",
+  "signature": "18a64597f0601026925d6bffc20da7e202ef5348c5713b4ef41f4e3d400d0840b0251c942b6cdf89766273b76d718a2bd32decbf8661c637f3961bc6a879850e"
+}

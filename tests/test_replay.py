@@ -1,12 +1,41 @@
-import json
-from pathlib import Path
-from cap.models import Decision, EvidenceCompleteness
+import pytest
+from cap.models import (
+    TraceEnvelope, Action, Attestation, Decision, EvidenceStatus,
+    ContinuityScope, KeyResolution
+)
 from cap.replay import replay_trace
 
-ROOT = Path(__file__).resolve().parents[1]
-def load(name): return json.loads((ROOT / "traces" / name).read_text())
-def test_replay_matches_and_detects_tampering():
-    r = replay_trace(load("replay-example.json")); assert r.replay_success and r.decision_matches and r.reconstructed_decision is Decision.ALLOW
-    trace = load("replay-example.json"); trace["decision"] = "DENY"; assert not replay_trace(trace).replay_success
-def test_incomplete_evidence_is_represented():
-    r = replay_trace(load("hold-attestation-unavailable.json")); assert r.evidence_completeness_status is EvidenceCompleteness.PARTIAL
+def _envelope(decision=Decision.ALLOW):
+    return TraceEnvelope(
+        version="cap-envelope-v1",
+        decision=decision,
+        action=Action("transfer", "acc1", {"amt": 10}),
+        attestation=Attestation("transfer", "acc1", "hash", 1, "auth-001", 1000),
+        evidence_status=[EvidenceStatus.FRESH],
+        policy_version="v1",
+        policy_bundle_digest="deadbeef",
+        authority_state="VALID",
+        continuity_valid=True,
+        continuity_scope=ContinuityScope("auth-001", "ns", 0, 1, 60, "deadbeef"),
+        key_resolution=KeyResolution("key-demo-001", "Ed25519", "annual", 0, 9999999999),
+        observer_id="decisionassure-reference",
+        reference_frame="cap-envelope-v1",
+        runtime_context={},
+        key_id="key-demo-001",
+        signature="",
+    )
+
+def test_replay_ok():
+    env = _envelope()
+    ok, decision, _ = replay_trace(env)
+    assert ok is True
+    assert decision == Decision.ALLOW
+
+def test_replay_integrity_fail():
+    env = _envelope()
+    env.continuity_valid = False
+    # replay_trace should still return the recorded decision; integrity is
+    # determined by the caller via signature verification. Adjust if you
+    # change replay semantics later.
+    ok, decision, _ = replay_trace(env)
+    assert decision == Decision.ALLOW

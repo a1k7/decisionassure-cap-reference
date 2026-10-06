@@ -1,0 +1,9 @@
+{
+  "key-demo-001": {
+    "algorithm": "Ed25519",
+    "public_key_hex": "4bfc68fa08a98f64f458d09c819fbd68978c51fbdb7c61fbbe8c76b7f8a36fa8",
+    "rotation_policy": "annual",
+    "issued_at": 900,
+    "expires_at": 4102444800
+  }
+}

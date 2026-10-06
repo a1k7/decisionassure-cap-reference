@@ -59,3 +59,49 @@ To emit a self-contained, signed CAP proof trace with an embedded public key:
 python emit_signed_trace.py
 
 See [docs/](docs/) for the model, threat and trust-boundary analysis, replay, and validation scope.
+
+
+## Signed Envelope
+
+The signed object is the **envelope**, not the attestation. The envelope
+contains the decision, action, attestation, policy-bundle digest, continuity
+scope, key resolution, and evidence status. The Ed25519 signature covers the
+RFC 8785 (JCS) canonical encoding of the envelope minus the `signature` field.
+
+    canonicalize(envelope \ {signature})  →  Ed25519 sign/verify
+
+Two properties follow:
+
+1. Changing `decision`, `policy_bundle_digest`, `authority_state`,
+   `continuity_valid`, or the action parameters invalidates the signature.
+2. `key_id` is resolved out-of-band against a keyring. The public key is
+   never read from the artifact. Self-consistency is not attribution.
+
+### Canonicalization
+
+All signed data uses RFC 8785 (JCS). JSON produced by `json.dumps` with
+`sorted_keys=True` is not JCS and diverges on non-ASCII strings and number
+formatting. Do not sign anything that has not passed through
+`cap.canonicalize.canonicalize`.
+
+### Refusal Symmetry
+
+ALLOW, DENY, HOLD, and REAUTHORIZE envelopes share one schema and commit to
+the same `policy_bundle_digest`. A reviewer can distinguish a DENY under
+policy X from a DENY under an earlier version of the policy without trusting
+the emitter.
+
+### Continuity Scope
+
+`continuity_scope` is signed inside the envelope. Sequence-gap detection is
+relative to an anchored scope, not a mutable local parameter. If the scope is
+narrowed after the fact, the envelope's signature fails.
+
+### Verifying an Envelope
+
+    from attestation.verifier import verify_envelope
+    from cap.models import TraceEnvelope
+
+    envelope = TraceEnvelope(**json.loads(open("traces/allow.json").read()))
+    keyring  = {"key-demo-001": bytes.fromhex(open("traces/keyring.json").read()["key-demo-001"]["public_key_hex"])}
+    assert verify_envelope(envelope, keyring)

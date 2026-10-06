@@ -1,37 +1,57 @@
-from dataclasses import replace
-from attestation.schema import generate_demo_key, load_public_key, public_key_bytes, sign_attestation
-from attestation.verifier import verify_action_binding, verify_attestation
-from cap.models import Action, AuthorizationAttestation, VerificationStatus
-from cap.admissibility import evaluate_admissibility
-from cap.models import Decision, EvidenceReference, GovernanceState, RuntimeContext
+import pytest
+from cap.models import Action, EvidenceStatus
+from cap.verifier import Verifier
+from attestation.schema import build_attestation, build_envelope, sign_envelope
+from cap.models import Decision, ContinuityScope, KeyResolution
+from cap.hash_utils import sha256_hex
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives import serialization
 
-def signed():
-    key = generate_demo_key(); action = Action("transfer", "r1", {"amount": 1})
-    att = sign_attestation(AuthorizationAttestation("a", action, 1, "2026-01-01T00:00:00Z", "clock", "auth", "key"), key)
-    return att, action, {"key": load_public_key(public_key_bytes(key))}
+@pytest.fixture
+def keys():
+    priv = Ed25519PrivateKey.generate()
+    pub = priv.public_key().public_bytes(
+        serialization.Encoding.Raw, serialization.PublicFormat.Raw
+    )
+    return priv, pub
 
-def test_signature_valid_modified_and_wrong_key():
-    att, action, keys = signed()
-    assert verify_attestation(att, keys).status is VerificationStatus.VALID
-    assert verify_attestation(replace(att, authority_reference="other"), keys).status is VerificationStatus.INVALID
-    assert verify_attestation(att, {"key": generate_demo_key().public_key()}).status is VerificationStatus.INVALID
+def test_binding_match(keys):
+    priv, pub = keys
+    verifier = Verifier({"key-demo-001": pub})
+    action = Action("transfer", "acc1", {"amt": 10})
+    att = build_attestation(action, "auth-001", 1, 1000)
+    envelope, _ = verifier.evaluate(
+        action, att, previous_sequence=None,
+        runtime_context={"current_time": 1500, "policy_version": "v1"},
+        policy_bundle_digest=sha256_hex(b"policy"),
+        continuity_scope=ContinuityScope(
+            "auth-001", "ns", 0, 1, 60, sha256_hex(b"policy")
+        ),
+        key_resolution=KeyResolution(
+            "key-demo-001", "Ed25519", "annual", 0, 9999999999
+        ),
+        key_id="key-demo-001",
+    )
+    assert envelope.decision == Decision.ALLOW
+    assert EvidenceStatus.BINDING_MISMATCH not in envelope.evidence_status
 
-def test_action_binding_exactness():
-    att, action, _ = signed()
-    assert verify_action_binding(att, action).status is VerificationStatus.VALID
-    for changed in (Action("transfer", "r1", {"amount": 2}), Action("transfer", "r2", {"amount": 1}), Action("delete", "r1", {"amount": 1})):
-        assert verify_action_binding(att, changed).reasons == ("ACTION_BINDING_MISMATCH",)
-
-def test_admissibility_reference_decisions():
-    key = generate_demo_key(); action = Action("transfer", "r", {"amount": 1})
-    att = sign_attestation(AuthorizationAttestation("a", action, 1, "2026-01-01T00:00:00Z", "c", "auth", "k"), key)
-    state = GovernanceState("o", "f", "1", "auth", "d", True, VerificationStatus.VALID)
-    context = RuntimeContext(state, (EvidenceReference("e", "x", "now", VerificationStatus.VALID, "ref"),), 1, True, state.continuity_hash())
-    keys = {"k": load_public_key(public_key_bytes(key))}
-    assert evaluate_admissibility(att, action, context, keys).decision is Decision.ALLOW
-    assert evaluate_admissibility(att, action, replace(context, expected_sequence=2), keys).decision is Decision.HOLD
-    assert evaluate_admissibility(None, action, replace(context, attestation_available=False), keys).decision is Decision.HOLD
-    assert evaluate_admissibility(replace(att, signature="bad"), action, context, keys).decision is Decision.DENY
-    assert evaluate_admissibility(att, Action("transfer", "r", {"amount": 2}), context, keys).decision is Decision.DENY
-    changed = replace(context, governance_state=GovernanceState("o", "f", "2", "auth", "d", True, VerificationStatus.VALID))
-    assert evaluate_admissibility(att, action, changed, keys).decision is Decision.REAUTHORIZE
+def test_binding_mismatch(keys):
+    priv, pub = keys
+    verifier = Verifier({"key-demo-001": pub})
+    action1 = Action("transfer", "acc1", {"amt": 10})
+    action2 = Action("transfer", "acc1", {"amt": 20})
+    att = build_attestation(action1, "auth-001", 1, 1000)
+    envelope, _ = verifier.evaluate(
+        action2, att, previous_sequence=None,
+        runtime_context={"current_time": 1500, "policy_version": "v1"},
+        policy_bundle_digest=sha256_hex(b"policy"),
+        continuity_scope=ContinuityScope(
+            "auth-001", "ns", 0, 1, 60, sha256_hex(b"policy")
+        ),
+        key_resolution=KeyResolution(
+            "key-demo-001", "Ed25519", "annual", 0, 9999999999
+        ),
+        key_id="key-demo-001",
+    )
+    assert envelope.decision == Decision.DENY
+    assert EvidenceStatus.BINDING_MISMATCH in envelope.evidence_status

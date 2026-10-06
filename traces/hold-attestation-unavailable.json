@@ -1,1 +1,48 @@
-{"trace_version":"0.1","trace_id":"unavailable-001","event_type":"execution","action":{"action_type":"transfer","resource":"account-001","parameters":{"amount":100}},"attestation":null,"governance_state":{"policy_version":"1.0"},"evidence":[{"evidence_id":"ev-004","freshness_status":"UNKNOWN","reference":"external://demo/ev-004"}],"declared_conditions":{"attestation_available":false,"signature_valid":false,"binding_valid":false,"authority_valid":true,"sequence_status":"UNKNOWN","continuity_status":"UNKNOWN"},"decision":"HOLD","rule_id":"CAP-REF-001","rule_version":"0.1","failure_reasons":["ATTESTATION_UNAVAILABLE"],"provenance":{"fixture":true},"trace_hash":"b6a02d9e91c7d9fac92e3bdee91d3698a879db56559b3f865f274e56fb495b98"}
+{
+  "version": "cap-envelope-v1",
+  "decision": "HOLD",
+  "action": {
+    "action_type": "transfer",
+    "resource": "account-001",
+    "parameters": {
+      "amount": 100
+    }
+  },
+  "attestation": {
+    "action_type": "transfer",
+    "resource": "account-001",
+    "parameters_hash": "1477bd49d2f9523c05a4ae4f47e6f901c1a4613aca9d9d492b1a6263d14cca0b",
+    "sequence_number": 1043,
+    "authority_reference": "auth-001",
+    "timestamp": 1000
+  },
+  "evidence_status": [
+    "MISSING"
+  ],
+  "policy_version": "v1",
+  "policy_bundle_digest": "c19eb5ef722bd354f4ca635000778c30b994bbf7e6e99c0560d3bc3ad142ab49",
+  "authority_state": "VALID",
+  "continuity_valid": true,
+  "continuity_scope": {
+    "authority_reference": "auth-001",
+    "sequence_namespace": "attestation/auth-001",
+    "start_sequence": 1000,
+    "expected_next": 1044,
+    "heartbeat_interval_seconds": 60,
+    "policy_bundle_digest": "c19eb5ef722bd354f4ca635000778c30b994bbf7e6e99c0560d3bc3ad142ab49"
+  },
+  "key_resolution": {
+    "key_id": "key-demo-001",
+    "algorithm": "Ed25519",
+    "rotation_policy": "annual",
+    "issued_at": 900,
+    "expires_at": 4102444800
+  },
+  "observer_id": "decisionassure-reference",
+  "reference_frame": "cap-envelope-v1",
+  "runtime_context": {
+    "current_time": 1500
+  },
+  "key_id": "key-demo-001",
+  "signature": "ad12253f5e2310530ac24eadc6b05c173c45c8e128de23e5f4bbf633f2d88d07bc7260cedb266784d643fad45fae7f0629efb16a9b988c9b0f750f7c4f1c0c02"
+}

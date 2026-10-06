@@ -1,10 +1,10 @@
-"""Hash helpers."""
-from __future__ import annotations
+"""Hash utilities."""
 import hashlib
-from typing import Any
-from .canonicalize import canonicalize
 
+def sha256(data: bytes) -> bytes:
+    """Return the SHA-256 digest of data as raw bytes."""
+    return hashlib.sha256(data).digest()
 
-def sha256_digest(obj: Any) -> str:
-    """Return a lower-case SHA-256 hex digest of canonical JSON input."""
-    return hashlib.sha256(canonicalize(obj)).hexdigest()
+def sha256_hex(data: bytes) -> str:
+    """Return the SHA-256 digest of data as a lowercase hex string."""
+    return hashlib.sha256(data).hexdigest()

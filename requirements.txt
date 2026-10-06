@@ -1,2 +1,5 @@
 cryptography>=42.0
 pytest>=8.0
+cryptography>=42.0
+pytest>=8.0
+jcs>=0.2.1
